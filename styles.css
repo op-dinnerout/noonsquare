@@ -129,8 +129,6 @@ ul { list-style: none; padding: 0; margin: 0; }
   padding: 20px 0;
 }
 
-.section--snug { min-height: 0; }
-
 .eyebrow {
   font-size: 13px;
   font-weight: 500;
@@ -256,30 +254,64 @@ ul { list-style: none; padding: 0; margin: 0; }
   transform: scale(1.3);
 }
 
-/* ── About (image + text + compact timeline) ──────────── */
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: 56px;
-  align-items: center;
+/* ── About (Full-bleed background section) ────────────── */
+.section--about-bg {
+  position: relative;
+  min-height: 70vh;
+  background-image: url('images/about/about_main.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
 }
 
-.about-image img {
-  width: 100%;
-  height: auto;
-  border-radius: 12px;
-  display: block;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+.section--about-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.65));
+  z-index: 0;
 }
 
-.about-text .prose { max-width: 540px; }
+.about-bg__content {
+  position: relative;
+  z-index: 1;
+}
 
-@media (max-width: 768px) {
-  .about-grid {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-  .about-text .prose { max-width: 100%; }
+.section--about-bg h2 {
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.about-bg__desc-kr,
+.about-bg__desc-en {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  font-weight: 300;
+}
+
+.about-bg__desc-kr {
+  font-size: clamp(16px, 1.6vw, 19px);
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.about-bg__desc-en {
+  font-size: clamp(13px, 1.2vw, 15px);
+  margin-top: 0;
+  margin-bottom: 0;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.02em;
+  font-style: italic;
+}
+
+/* iOS Safari 등 모바일에서 fixed 미지원 → 정적 배경으로 fallback */
+@media (max-width: 768px), (hover: none) {
+  .section--about-bg { background-attachment: scroll; }
 }
 
 .timeline {
