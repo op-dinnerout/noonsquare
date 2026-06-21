@@ -104,6 +104,7 @@
           <li><a href="#stores">매장</a></li>
           <li><a href="#leasing"><span class="nav-full">입점 문의</span><span class="nav-short">입점</span></a></li>
           <li><a href="#location"><span class="nav-full">오시는 길</span><span class="nav-short">방문</span></a></li>
+          <li id="nav-news" hidden><a href="#" id="nav-news-link">소식</a></li>
         </ul>
       </nav>
     </div>
@@ -407,6 +408,21 @@
     </div>
   </footer>
 
+  <!-- NEWS POPUP MODAL -->
+  <div id="news-modal" class="news-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="소식">
+    <div class="news-modal__backdrop" data-news-close></div>
+    <div class="news-modal__panel">
+      <button type="button" class="news-modal__close" data-news-close aria-label="닫기">&times;</button>
+      <a id="news-modal-link" class="news-modal__media" href="#" target="_blank" rel="noopener">
+        <img id="news-modal-img" src="" alt="소식 이미지" />
+      </a>
+      <label class="news-modal__hide">
+        <input type="checkbox" id="news-modal-hide-today" />
+        <span>오늘 하루 보지 않기</span>
+      </label>
+    </div>
+  </div>
+
   <script>
     // ── Hello, developer 👋 ────────────────────────────
     console.log(
@@ -482,6 +498,74 @@
       });
 
       start();
+    })();
+
+    // ── 소식 팝업 (News Popup) ────────────────────────
+    // PM 운영: 아래 두 변수만 수정. 자세한 가이드는 site/images/news/README.txt 참고.
+    //   - NEWS_IMAGE 가 빈 문자열이면 메뉴 숨김 + 팝업 안 뜸
+    //   - NEWS_LINK 가 비어있으면 이미지 클릭해도 아무 동작 없음
+    (function () {
+      const NEWS_IMAGE = 'images/news/popup.png'; // 예: 'images/news/popup.jpg'
+      const NEWS_LINK  = ''; // 예: 'https://www.instagram.com/noonsquare/'
+
+      if (!NEWS_IMAGE) return; // 등록 안 됨 → 메뉴/팝업 둘 다 숨김
+
+      const navItem   = document.getElementById('nav-news');
+      const navLink   = document.getElementById('nav-news-link');
+      const modal     = document.getElementById('news-modal');
+      const modalImg  = document.getElementById('news-modal-img');
+      const modalLink = document.getElementById('news-modal-link');
+      const hideToday = document.getElementById('news-modal-hide-today');
+      if (!navItem || !modal) return;
+
+      // 이미지·링크 세팅
+      modalImg.src = NEWS_IMAGE;
+      if (NEWS_LINK) {
+        modalLink.href = NEWS_LINK;
+        modalLink.removeAttribute('aria-disabled');
+      } else {
+        modalLink.removeAttribute('href');
+        modalLink.style.cursor = 'default';
+        modalLink.addEventListener('click', function (e) { e.preventDefault(); });
+      }
+
+      // 헤더 "소식" 메뉴 노출
+      navItem.hidden = false;
+
+      function openModal() {
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal() {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (hideToday && hideToday.checked) {
+          const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+          try { localStorage.setItem('noonsquare_news_hide_until', String(tomorrow)); } catch (e) {}
+          hideToday.checked = false;
+        }
+      }
+
+      // 닫기 트리거 (X 버튼, 배경 클릭)
+      modal.querySelectorAll('[data-news-close]').forEach(function (el) {
+        el.addEventListener('click', closeModal);
+      });
+      // ESC 키
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+      });
+      // 헤더 "소식" 클릭 시 재열기
+      navLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal();
+      });
+
+      // 첫 진입: "오늘 하루 보지 않기" 기간 안이면 스킵
+      let hideUntil = 0;
+      try { hideUntil = parseInt(localStorage.getItem('noonsquare_news_hide_until') || '0', 10); } catch (e) {}
+      if (Date.now() > hideUntil) openModal();
     })();
   </script>
 
